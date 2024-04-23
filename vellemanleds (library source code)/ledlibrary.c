@@ -1,7 +1,7 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <usart.h>
-#include <vellemanleds.h>
+#include <ledlibrary.h>
 
 void enableOneLed(int led){
     if ( led < 0 || led > 3 ) return;

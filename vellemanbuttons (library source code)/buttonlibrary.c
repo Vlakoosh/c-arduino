@@ -1,7 +1,7 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <usart.h>
-#include <vellemanbuttons.h>
+#include <buttonlibrary.h>
 
 void enableButton( int button ){
     DDRC &= ~( 1 << button ); /* Button 'button' is connected to Cbutton.
