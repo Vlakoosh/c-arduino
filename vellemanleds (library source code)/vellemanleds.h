@@ -1,26 +1,29 @@
-#include <util/delay.h>
-#include <avr/io.h>
-#include <usart.h>
-
 void enableOneLed(int);
+  /* parameters: lednumber */ 
 
 void enableMultipleLeds(uint8_t); 
+  /* parameters: byte of leds */ 
 
 void enableAllLeds ();
 
 void lightUpOneLed(int); 
+  /* parameters: lednumber */ 
 
 void lightUpMultipleLeds (uint8_t);
+  /* parameters: byte of leds */ 
 
 void lightUpAllLeds (); 
 
 void lightDownOneLed(int); 
+  /* parameters: lednumber */ 
 
 void lightDownMultipleLeds (uint8_t);
+  /* parameters: byte of leds */ 
 
 void lightDownAllLeds (); 
 
 void lightToggleOneLed(int);
+  /* parameters: lednumber */ 
 
 void dimLed(int, int, int);  
   /* parameters: lednumber, percentage, duration */ 
@@ -28,5 +31,5 @@ void dimLed(int, int, int);
 void fadeInLed(int, int);  
   /* parameters: lednumber, duration*/ 
 
-//void fadeOutLed(int, int);
+void fadeOutLed(int, int);
   /* parameters: lednumber, duration */

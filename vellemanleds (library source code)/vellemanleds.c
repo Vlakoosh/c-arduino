@@ -1,7 +1,7 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <usart.h>
-
+#include <vellemanleds.h>
 
 void enableOneLed(int led){
     if ( led < 0 || led > 3 ) return;
@@ -60,8 +60,11 @@ void dimLed(int led, int percentage, int duration){
     }
 
 }
-//parameters: lednumber, percentage, duration
 
+// _delay_ms time has to be constant or compiler throws error. 
+//That's why this method is here
+//This should be used in for loops where the delay can change 
+//inbetween the iterations of the loop
 void delayWithVariableTime(int ms)
 {
     for (int i = 0; i < ms; i++) {
@@ -85,13 +88,20 @@ void fadeInLed(int led , int duration ){
         ontime += change;
     }
 }
-//parameters: lednumber, duration
 
-/*
 void fadeOutLed(int, int){
+    if (led < 0 || led > 3){ return; }
+    
+    int offtime = 1;
+    int ontime = 100;
+    int change = 100/(duration*10);
 
+    for(int i = 0; i < (duration*10); i++) {
+        lightUpOneLed(led);
+        delayWithVariableTime(ontime); 
+        lightDownOneLed(led);
+        delayWithVariableTime(offtime);
+        offtime += change;
+        ontime -= change;
+    }
 }
-//parameters: lednumber, duration
-
-  */
-
