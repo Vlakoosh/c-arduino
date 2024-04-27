@@ -5,8 +5,11 @@
 #include <vellemanleds.h>
 #include <stdlib.h>
 
+//number of total characters with their morse code
 #define NUM_OF_CHARACTERS 26
 
+//countdown before a letter is shown. (shield LEDs are enabled one by one)
+//This is so the user can get ready to look at morse code flashes
 void countdown(){
   lightDownAllLeds();
   _delay_ms(1000);
@@ -22,6 +25,7 @@ void countdown(){
   _delay_ms(1000);
 }
 
+//takes a letter number and displays it as morse code (as LED flashes on the shield)
 void flashLetter(int letter, int flashes[], int length){
   for (int i = 0; i < length; i++){
     if (flashes[i])
@@ -42,6 +46,7 @@ void flashLetter(int letter, int flashes[], int length){
 int main() {
   //create an array of pointers that will point to arrays of int of length 4
   int *alphabet[NUM_OF_CHARACTERS];
+  //create an array of morse code lengthsin the same order as the corresponding characters
   int lengths[NUM_OF_CHARACTERS] = {2,4,4,3,1,4,3,4,2,4,3,3,2,2,3,4,4,3,3,1,3,4,3,4,4,4};
 
   //declare all letter morse code values
@@ -71,6 +76,17 @@ int main() {
   int x[] = {1,0,0,1};
   int y[] = {1,0,1,1};
   int z[] = {1,1,0,0};
+  //declare all numbers morse code values
+  int n0[] = {};
+  int n1[] = {};
+  int n2[] = {};
+  int n3[] = {};
+  int n4[] = {};
+  int n5[] = {};
+  int n6[] = {};
+  int n7[] = {};
+  int n8[] = {};
+  int n9[] = {};
 
   //assign values to the pointer array.
   //set all letters in alphabet array manually.
@@ -113,6 +129,7 @@ int main() {
   //initial countdown/animation
   countdown();
 
+ //some test code
   int letter = 18;
   flashLetter(letter, alphabet[letter], lengths[letter]);
   _delay_ms(500);
