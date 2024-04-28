@@ -4,6 +4,8 @@
 #include <vellemanbuttons.h>
 #include <vellemanleds.h>
 #include <stdlib.h>
+#include <stdio.h> 
+#include <time.h> 
 
 //number of total characters with their morse code
 #define NUM_OF_CHARACTERS 26
@@ -47,7 +49,7 @@ int main() {
   //create an array of pointers that will point to arrays of int of length 4
   int *alphabet[NUM_OF_CHARACTERS];
   //create an array of morse code lengthsin the same order as the corresponding characters
-  int lengths[NUM_OF_CHARACTERS] = {2,4,4,3,1,4,3,4,2,4,3,3,2,2,3,4,4,3,3,1,3,4,3,4,4,4};
+  int lengths[NUM_OF_CHARACTERS] = {2,4,4,3,1,4,3,4,2,4,3,4,2,2,3,4,4,3,3,1,3,4,3,4,4,4};
 
   //declare all letter morse code values
   int a[] = {0,1};
@@ -61,7 +63,7 @@ int main() {
   int i[] = {0,0};
   int j[] = {0,1,1,1};
   int k[] = {1,0,1};
-  int l[] = {1,1,1};
+  int l[] = {0,1,0,0};
   int m[] = {1,1};
   int n[] = {1,0};
   int o[] = {1,1,1};
@@ -129,34 +131,74 @@ int main() {
   //initial countdown/animation
   countdown();
 
- //some test code
-  int letter = 18;
-  flashLetter(letter, alphabet[letter], lengths[letter]);
-  _delay_ms(500);
-
-  letter = 14;
-  flashLetter(letter, alphabet[letter], lengths[letter]);
-  _delay_ms(500);
-
-  letter = 18;
-  flashLetter(letter, alphabet[letter], lengths[letter]);
-  _delay_ms(500);
-
-  return 0;
-
-  // int letterNumber = 5;
-  // int length = lengths[letterNumber];
-  // for (int i = 0; i < length; i++)
-  // {
-  //   if (alphabet[letterNumber][i])
-  //   {
-  //     /* code */
-  //   }
-  //   else {
-
-  //   }
+  //begin quiz here; repeat 3 times
+  for (int i = 0; i < 5; i++)
+  {
+    //change the random number generator seed to noise from analog pin 0
+   // srand(analogRead(0));
+    //set a random number to display as morse code
+    int letterNumber = rand() % NUM_OF_CHARACTERS;
     
-  // }
+
+    //display the letter in morse code on the LEDs
+    flashLetter(letterNumber, alphabet[letterNumber], lengths[letterNumber]);
+    _delay_ms(1000);
+
+    //change the random number generator seed to noise from analog pin 1
+   // srand(analogRead(1));
+
+    //create an array of answers to choose from
+    int answers[] = {0, 0, 0};
+
+    //set the answers randomly
+
+    answers[rand() % 3] = letterNumber;
+    printf("%d + %c%c%c", letterNumber, (char) answers[0] + 97, (char) answers[1] + 97, (char) answers[2] + 97);
+    for (int i = 0; i < 3; i++)
+    {
+      if (answers[i] == 0)
+      {
+        answers[i] = rand() % NUM_OF_CHARACTERS;
+      }
+    }
+
+    printf("what was the displayed character?");
+    printf("Answer 1: %c   |   Answer 2: %c   | Answer 3: %c ", (char) answers[0] + 97, (char) answers[1] + 97, (char) answers[2] + 97);
+
+    //wait until a button is pressed
+    int isAnswered = 0;
+    while (isAnswered == 0)
+    {
+      if (buttonPushed(1) && answers[0] == letterNumber)
+      {
+        isAnswered = 1;
+      }
+      else if (buttonPushed(2) && answers[1] == letterNumber)
+      {
+        isAnswered = 1;
+      }
+      else if (buttonPushed(3) && answers[2] == letterNumber)
+      {
+        isAnswered = 1;
+      } else if (buttonPushed(1) || buttonPushed(2) || buttonPushed(3))
+      {
+        isAnswered = -1;
+      }
+    }
+    if (isAnswered > 0) {
+      printf("\n\n");
+      printf("You answered correctly!");
+    } else {
+      printf("\n\n");
+      printf("You answered wrong!! the correct answer is %c ", (char)letterNumber + 97);
+    }
+  }
   
+
+  
+
+  
+
+  return 0;  
 }
 
