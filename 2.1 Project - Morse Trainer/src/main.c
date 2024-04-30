@@ -193,12 +193,6 @@ int main() {
       printf("You answered wrong!! the correct answer is %c ", (char)letterNumber + 97);
     }
   }
-  
-
-  
-
-  
-
   return 0;  
 }
 
