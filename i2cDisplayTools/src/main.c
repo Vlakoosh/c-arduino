@@ -19,7 +19,7 @@ void i2c_init() {
     // this is just like enabling a button pin as input
 
 }
- 
+//
 
 void i2c_start() {
     // Start condition: SDA from high to low while SCL is high
