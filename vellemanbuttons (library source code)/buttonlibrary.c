@@ -4,9 +4,10 @@
 #include <buttonlibrary.h>
 
 void enableButton( int button ){
-    DDRC &= ~( 1 << button ); /* Button 'button' is connected to Cbutton.
-                             * We set the corresponding bit in the Data Direction Register to 0. */
+    DDRC &= ~( 1 << button ); /* set the corresponding bit in the Data Direction Register to 0. */
+    // (doing so tells the arduino to use that pin as an input) 
     PORTC |= ( 1 << button ); /* Activate the Pull-up of C1: PINC will be set to high */
+    //this is done to avoid invalid input and noise, just do it
 }
 
 int buttonPushed( int button ){
