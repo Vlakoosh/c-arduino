@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "vellemanleds.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
