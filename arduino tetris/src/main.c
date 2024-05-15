@@ -5,19 +5,24 @@
 #include <string.h>
 #include <usart.h>
 
-#define DATA_PIN_1 PD2
-#define DATA_PIN_2 PD5
-#define PUSH_CLOCK_1 PD3
-#define PUSH_CLOCK_2 PD6
-#define UPDATE_CLOCK_1 PD4
-#define UPDATE_CLOCK_2 PD7
+#define DATA_PIN_1 PD4
+#define DATA_PIN_2 PD6
+#define PUSH_CLOCK_1 PD5
+#define PUSH_CLOCK_2 PD7
+#define CLOCK PD2
+
+#define BUTTON_LEFT PB4
+#define BUTTON_RIGHT PB5
+#define BUTTON_UP PC0
+#define BUTTON_DOWN PC1
+#define BUTTON_A PC2
+#define BUTTON_B PC3
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 void lightUpWholeMatrix(){
   //light down the clocks
-  PORTD &= ~(1 << UPDATE_CLOCK_1);
-  PORTD &= ~(1 << UPDATE_CLOCK_2);
+  PORTD &= ~(1 << CLOCK);
 
   PORTD &= ~(1 << PUSH_CLOCK_1);
   PORTD &= ~(1 << PUSH_CLOCK_2);
@@ -35,14 +40,12 @@ void lightUpWholeMatrix(){
     PORTD &= ~(1 << PUSH_CLOCK_2);
   }
   //update the output
-  PORTD |= (1 << UPDATE_CLOCK_1);
-  PORTD |= (1 << UPDATE_CLOCK_2);
+  PORTD |= (1 << CLOCK);
 }
 
 void lightDownWholeMatrix(){
   //light down the clocks
-  PORTD &= ~(1 << UPDATE_CLOCK_1);
-  PORTD &= ~(1 << UPDATE_CLOCK_2);
+  PORTD &= ~(1 << CLOCK);
 
   PORTD &= ~(1 << PUSH_CLOCK_1);
   PORTD &= ~(1 << PUSH_CLOCK_2);
@@ -60,8 +63,7 @@ void lightDownWholeMatrix(){
     PORTD &= ~(1 << PUSH_CLOCK_2);
   }
   //update the output
-  PORTD |= (1 << UPDATE_CLOCK_1);
-  PORTD |= (1 << UPDATE_CLOCK_2);
+  PORTD |= (1 << CLOCK);
 }
 
 void setRow(int row){
@@ -69,7 +71,7 @@ void setRow(int row){
   row = row-1;
   
   //light down the clocks
-  PORTD &= ~_BV(UPDATE_CLOCK_2);
+  PORTD &= ~_BV(CLOCK);
 
   PORTD &= ~_BV(PUSH_CLOCK_2);
 
@@ -85,7 +87,7 @@ void setRow(int row){
     PORTD |= _BV(PUSH_CLOCK_2);
     PORTD &= ~_BV(PUSH_CLOCK_2);
   }
-  PORTD |= _BV(UPDATE_CLOCK_2);
+  PORTD |= _BV(CLOCK);
   
 }
 
@@ -94,7 +96,7 @@ void setColumn(int col){
   col = col-1;
   
   //light down the clocks
-  PORTD &= ~_BV(UPDATE_CLOCK_1);
+  PORTD &= ~_BV(CLOCK);
 
   PORTD &= ~_BV(PUSH_CLOCK_1);
 
@@ -110,12 +112,12 @@ void setColumn(int col){
     PORTD |= _BV(PUSH_CLOCK_1);
     PORTD &= ~_BV(PUSH_CLOCK_1);
   }
-  PORTD |= _BV(UPDATE_CLOCK_1);
+  PORTD |= _BV(CLOCK);
 }
 
 void setMultipleColumns(uint8_t cols){
   //light down the clocks
-  PORTD &= ~_BV(UPDATE_CLOCK_1);
+  PORTD &= ~_BV(CLOCK);
 
   PORTD &= ~_BV(PUSH_CLOCK_1);
 
@@ -131,12 +133,13 @@ void setMultipleColumns(uint8_t cols){
     PORTD |= _BV(PUSH_CLOCK_1);
     PORTD &= ~_BV(PUSH_CLOCK_1);
   }
-  PORTD |= _BV(UPDATE_CLOCK_1);
+  PORTD |= _BV(CLOCK);
   _delay_ms(1);
 }
 
 void displayRow(int row, uint8_t columns){
   setRow(row);
+  setMultipleColumns(columns);
 }
 
 // void displayMatrix(int matrix[][]){
@@ -145,26 +148,36 @@ void displayRow(int row, uint8_t columns){
 
 
 int main(){
-  // int screen[8][8] = {
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0},
-  // {0,0,0,0,0,0,0,0}};
 
   DDRD |= (1 << DATA_PIN_1);
   DDRD |= (1 << DATA_PIN_2);
-  DDRD |= (1 << UPDATE_CLOCK_1);
-  DDRD |= (1 << UPDATE_CLOCK_2);
+  DDRD |= (1 << CLOCK);
+  DDRD |= (1 << CLOCK);
   DDRD |= (1 << PUSH_CLOCK_1);
   DDRD |= (1 << PUSH_CLOCK_2);
+
+  DDRB &= ~(1 << BUTTON_LEFT);
+  PORTB |= (1 << BUTTON_LEFT);
+
+  DDRB &= ~(1 << BUTTON_RIGHT);
+  PORTB |= (1 << BUTTON_RIGHT);
+  
+  DDRC &= ~(1 << BUTTON_UP);
+  PORTC |= (1 << BUTTON_UP);
+  
+  DDRC &= ~(1 << BUTTON_DOWN);
+  PORTC |= (1 << BUTTON_DOWN);
+  
+  DDRC &= ~(1 << BUTTON_A);
+  PORTC |= (1 << BUTTON_A);
+  
+  DDRC &= ~(1 << BUTTON_B);
+  PORTC |= (1 << BUTTON_B);
 
   PORTD &= ~(1 << PUSH_CLOCK_1);
   PORTD &= ~(1 << PUSH_CLOCK_2);
 
+  lightDownWholeMatrix();
   initUSART();
   while (1)
   {
@@ -188,6 +201,9 @@ int main(){
     setMultipleColumns((uint8_t) 0b01111110);
     setRow(8);
     setMultipleColumns((uint8_t) 0b10100101);
+    
+    
+    
 
     
     
