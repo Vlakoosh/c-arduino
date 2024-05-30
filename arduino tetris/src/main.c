@@ -6,9 +6,14 @@
 #include <usart.h>
 #include <ledmatrixlib.h>
 
-// void displayMatrix(int matrix[]){
 
-// }
+//set pins for breadboard buttons
+#define BUTTON_LEFT PB4
+#define BUTTON_RIGHT PB5
+#define BUTTON_UP PC0
+#define BUTTON_DOWN PC1
+#define BUTTON_A PC2
+#define BUTTON_B PC3
 
 void initButton() {
   DDRB &= ~(1 << BUTTON_LEFT);
@@ -35,7 +40,7 @@ int main(){
   init();
   initButton();
 
-  lightDownWholeTopMatrix();
+  lightUpWholeTopMatrix();
   lightUpWholeBottomMatrix();
   initUSART();
   // _delay_ms(1000);
@@ -43,245 +48,39 @@ int main(){
   // _delay_ms(1000);
   // setRowOnBottomMatrix(5);
 
-  // _delay_ms(500);
-  while (1)
+  _delay_ms(500);
+  // while (1)
   {
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000100);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00001100);
-      displayRow( 2, 0b00000100);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-    
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000100);
-      displayRow( 2, 0b00001100);
-      displayRow( 3, 0b00000100);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000100);
-      displayRow( 3, 0b00001100);
-      displayRow( 4, 0b00000100);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000100);
-      displayRow( 4, 0b00001100);
-      
-      displayRow( 5, 0b00000100);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000100);
-      
-      displayRow( 5, 0b00001100);
-      displayRow( 6, 0b00000100);
-      displayRow( 7, 0b00000000);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000100);
-      displayRow( 6, 0b00001100);
-      displayRow( 7, 0b00000100);
-      displayRow( 8, 0b11110011);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
-
-    for (int i = 0; i < 50; i++)
-    {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
-      
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000100);
-      displayRow( 7, 0b00001100);
-      displayRow( 8, 0b11110111);
-      
-      displayRow( 9, 0b11111011);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
-      
-    }
 
     while(1)
     {
-      displayRow( 1, 0b00000000);
-      displayRow( 2, 0b00000000);
-      displayRow( 3, 0b00000000);
-      displayRow( 4, 0b00000000);
       
-      displayRow( 5, 0b00000000);
-      displayRow( 6, 0b00000000);
-      displayRow( 7, 0b00000100);
-      displayRow( 8, 0b11111111);
-      
-      displayRow( 9, 0b11111111);
-      displayRow(10, 0b11101111);
-      displayRow(11, 0b01111111);
-      displayRow(12, 0b01111111);
-      
-      displayRow(13, 0b11101111);
-      displayRow(14, 0b11110101);
-      displayRow(15, 0b00111111);
-      displayRow(16, 0b10111111);
+      for (int i = 1; i <= 16; i++)
+      {
+        if (i == 1)
+        {
+          setMultipleColumnsOnBottomMatrix(0b00000000);
+        }
+        if (i == 9)
+        {
+          setMultipleColumnsOnTopMatrix(0b00000000);
+        }
+        
+        for (int x = 0; x < 8; x++)
+        {
+          uint8_t cols;
+          if (i % 2)
+          {
+            cols = _BV(x);          
+          }
+          else {
+            cols = cols = _BV(7-x);  
+          }
+          displayRow(i, cols);
+          _delay_ms(50);          
+        }
+        
+      }
       
     }
     
