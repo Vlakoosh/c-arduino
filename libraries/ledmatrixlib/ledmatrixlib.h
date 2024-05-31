@@ -1,28 +1,4 @@
 #include <avr/io.h>
-#include <util/delay.h>
-
-//set pins for top LED matrix
-#define DATA_PIN_ROW_1 PD6
-#define PUSH_PIN_ROW_1 PD7
-#define DATA_PIN_COLUMN_1 PD4
-#define PUSH_PIN_COLUMN_1 PD5
-
-//set pins for bottom LED matrix
-#define DATA_PIN_ROW_2 PB0
-#define PUSH_PIN_ROW_2 PB1
-#define DATA_PIN_COLUMN_2 PB2
-#define PUSH_PIN_COLUMN_2 PB3
-
-//set pin for the shared update clock signal
-#define CLOCK PD2
-
-//set pins for breadboard buttons
-#define BUTTON_LEFT PB4
-#define BUTTON_RIGHT PB5
-#define BUTTON_UP PC0
-#define BUTTON_DOWN PC1
-#define BUTTON_A PC2
-#define BUTTON_B PC3
 
 //initialize all the pins for the library
 void init();
@@ -65,3 +41,6 @@ void setMultipleColumnsOnBottomMatrix(uint8_t cols);
 
 //enable ONE specific row and ONE or MORE columns at once. The method picks automatically between the top and bottom matrix
 void displayRow(int row, uint8_t columns);
+
+//hello world program for testing if the display is wired up correctly with the shift registers
+void testDisplay();

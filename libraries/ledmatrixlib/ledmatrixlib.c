@@ -24,9 +24,6 @@
 #define BUTTON_A PC2
 #define BUTTON_B PC3
 
-//little method to check if a pin is HIGH
-#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
-
 //initialize all the pins for the library
 void init() {
   DDRD |= (1 << DATA_PIN_COLUMN_1);
@@ -315,4 +312,40 @@ void displayRow(int row, uint8_t columns){
     
   }
   _delay_us(500);
+}
+
+
+void testDisplay() {
+  init();
+
+  _delay_ms(500);
+  while(1)
+  {
+    
+    for (int i = 1; i <= 16; i++)
+    {
+      if (i == 1)
+      {
+        setMultipleColumnsOnBottomMatrix(0b00000000);
+      }
+      if (i == 9)
+      {
+        setMultipleColumnsOnTopMatrix(0b00000000);
+      }
+      
+      for (int x = 0; x < 8; x++)
+      {
+        uint8_t cols;
+        if (i % 2)
+        {
+          cols = _BV(x);          
+        }
+        else {
+          cols = _BV(7-x);  
+        }
+        displayRow(i, cols);
+        _delay_ms(50);          
+      }
+    }
+  }
 }

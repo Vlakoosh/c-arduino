@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <usart.h>
+//library made by me
 #include <ledmatrixlib.h>
-
 
 //set pins for breadboard buttons
 #define BUTTON_LEFT PB4
@@ -36,53 +36,5 @@ void initButton() {
 }
 
 int main(){
-
-  init();
-  initButton();
-
-  lightUpWholeTopMatrix();
-  lightUpWholeBottomMatrix();
-  initUSART();
-  // _delay_ms(1000);
-  // setColumnOnBottomMatrix(3);
-  // _delay_ms(1000);
-  // setRowOnBottomMatrix(5);
-
-  _delay_ms(500);
-  // while (1)
-  {
-
-    while(1)
-    {
-      
-      for (int i = 1; i <= 16; i++)
-      {
-        if (i == 1)
-        {
-          setMultipleColumnsOnBottomMatrix(0b00000000);
-        }
-        if (i == 9)
-        {
-          setMultipleColumnsOnTopMatrix(0b00000000);
-        }
-        
-        for (int x = 0; x < 8; x++)
-        {
-          uint8_t cols;
-          if (i % 2)
-          {
-            cols = _BV(x);          
-          }
-          else {
-            cols = cols = _BV(7-x);  
-          }
-          displayRow(i, cols);
-          _delay_ms(50);          
-        }
-        
-      }
-      
-    }
-    
-  }
+  testDisplay();
 }
