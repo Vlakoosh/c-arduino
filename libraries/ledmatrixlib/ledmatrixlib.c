@@ -364,14 +364,7 @@ void testDisplay()
   }
 }
 
-// Function to read and print values of the array
-void printArray(uint8_t *array, int length)
-{
-  for (size_t i = 0; i < length; i++)
-  {
-    printf("array[%d] = %d\n", i, array[i]);
-  }
-}
+
 
 void displayScreenArray(uint8_t *screenArray, int width, int height)
 {

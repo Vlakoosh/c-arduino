@@ -45,8 +45,5 @@ void displayRow(int row, uint8_t columns);
 // hello world program for testing if the display is wired up correctly with the shift registers
 void testDisplay();
 
-// function to read and print values of the array
-void printArray(uint8_t *array, int length);
-
 // function to display an array of pixels on the matrix
 void displayScreenArray(uint8_t *screenArray, int width, int height);
