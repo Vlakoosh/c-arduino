@@ -18,8 +18,9 @@
 #define BUTTON_B PC2
 
 #define BUZZER_PIN PC5
+#define RANDOM_SEED_ANALOG_PIN PC4
 
-#define DEBOUNCE_TIME 100
+#define DEBOUNCE_TIME 10
 
 // game properties
 #define FIELD_WIDTH 8
@@ -73,6 +74,40 @@ void initButtonInterrupts()
   PCMSK1 |= _BV(BUTTON_DOWN);
   PCMSK1 |= _BV(BUTTON_A);
   PCMSK1 |= _BV(BUTTON_B);
+}
+
+void initADC(void)
+{
+    // AREF = AVcc
+    ADMUX = (1 << REFS0);
+    
+    // ADC Enable and prescaler of 128
+    // 16000000/128 = 125000
+    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+}
+
+uint16_t readADC(uint8_t ch)
+{
+    // Select ADC channel ch must be 0-7
+    ch &= 0b00000111;
+    ADMUX = (ADMUX & 0xF8) | ch;
+    
+    // Start single conversion
+    ADCSRA |= (1 << ADSC);
+    
+    // Wait for conversion to complete
+    while (ADCSRA & (1 << ADSC));
+    
+    return (ADC);
+}
+
+int getRandomNumber(int max)
+{
+  // get the random seed from pin A4 (channel 4)
+  uint16_t seed = readADC(4); 
+  srand(seed);
+
+  return rand() % (max + 1);
 }
 
 // game logic starts here:
@@ -149,14 +184,44 @@ int getRotatedIndex(int px, int py, int rotation)
   return 0;
 }
 
+void deleteRow(int row){
+  for (int column = 0; column < FIELD_WIDTH; column++) {
+        field[row * FIELD_WIDTH + column] = 0;
+    }
+}
+
+void movePiecesDown(int row) {
+  for (int y = row; y > 0; y--){
+        for (int x = 0; x < FIELD_WIDTH; x++){
+            int index = y * FIELD_WIDTH + x;
+            int nextIndex = index - FIELD_WIDTH;
+            field[index] = field[nextIndex];
+        }
+    }
+}
+
 void checkTetris()
 {
+  for (int row = 0; row < FIELD_HEIGHT; row++){
+        int tetris = 1;
+        for (int column = 0; column < FIELD_WIDTH; column++){
+            if (field[row*FIELD_WIDTH + column] == 0){
+                tetris = 0;
+                break;
+            }
+        }
+        if (tetris){
+            deleteRow(row);
+            movePiecesDown(row);
+        }
+    }
 }
 
 void newPiece()
 {
   cx = 2;
   cy = -3;
+  ci = getRandomNumber(6);
 }
 
 void clearPiece()
@@ -240,8 +305,7 @@ void putTile(int x, int y, int r)
 
     int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
 
-    // if the pixel is on the game field and is set to 1, push it to the game field
-    if (fi > 0 && pixel && field[fi])
+    if ( (fi > 0 && pixel && field[fi]) || (fi > (FIELD_HEIGHT * FIELD_WIDTH) && pixel) )
     {
       cx -= x;
       cy -= y;
@@ -359,6 +423,8 @@ int main()
 
   // set button interrupt registers
   initButtonInterrupts();
+
+  initADC();
 
   // enable global interrupts
   sei();
