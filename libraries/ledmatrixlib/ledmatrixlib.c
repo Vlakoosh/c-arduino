@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stddef.h>
 
 //set pins for top LED matrix
 #define DATA_PIN_ROW_1 PD6
@@ -16,16 +17,8 @@
 //set pin for the shared update clock signal
 #define CLOCK PD2
 
-//set pins for breadboard buttons
-#define BUTTON_LEFT PB4
-#define BUTTON_RIGHT PB5
-#define BUTTON_UP PC0
-#define BUTTON_DOWN PC1
-#define BUTTON_A PC2
-#define BUTTON_B PC3
-
 //initialize all the pins for the library
-void init() {
+void initMatrix() {
   DDRD |= (1 << DATA_PIN_COLUMN_1);
   DDRD |= (1 << DATA_PIN_ROW_1);
   DDRD |= (1 << PUSH_PIN_COLUMN_1);
@@ -316,7 +309,7 @@ void displayRow(int row, uint8_t columns){
 
 
 void testDisplay() {
-  init();
+  initMatrix();
 
   _delay_ms(500);
   while(1)
@@ -347,5 +340,27 @@ void testDisplay() {
         _delay_ms(50);          
       }
     }
+  }
+}
+
+// Function to read and print values of the array
+void printArray(uint8_t *array, int length) {
+    for (size_t i = 0; i < length; i++) {
+        printf("array[%d] = %d\n", i, array[i]);
+    }
+}
+
+void displayScreenArray(uint8_t *screenArray, int width, int height){
+  for (int row = 0; row < height; row++)
+  {
+    uint8_t cols = 0b00000000;
+    for (int col = 0; col < width; col++)
+    {
+      if (screenArray[row * width + col])
+      {
+        cols |= (1 << (width - col - 1));
+      }
+    }
+    displayRow(row + 1, cols);
   }
 }

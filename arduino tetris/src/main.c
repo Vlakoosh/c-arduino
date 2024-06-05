@@ -71,7 +71,7 @@ int rotation = 0;
 int currentX = 0;
 int currentY = 0;
 
-uint8_t* field[FIELD_HEIGHT*FIELD_WIDTH];
+uint8_t field[FIELD_HEIGHT * FIELD_WIDTH] = {0}; 
 
 TETROMINOS* pieces;
 
@@ -82,7 +82,6 @@ void makeTetrominos() {
   //check if malloc worked, throw error in console if it didn't
   if (pieces == NULL) {
     fprintf(stderr, "Memory allocation failed\n");
-    return 1;
   }
 
   pieces->all[0].bits = 0b0010001000100010;
@@ -99,7 +98,7 @@ void printPiece(uint16_t p) {
   printf("\n");
   for (int i = 15; i >= 0; i--)
   {
-    printf("%c", (p & (1 << i)) ? '■' : ' ');
+    printf("%c", (p & (1 << i)) ? '@' : ' ');
     if (i % 4 == 0)
     {
       printf("\n");
@@ -196,10 +195,17 @@ int main(){
 
   //enable global interrupts
   sei();
-  printf("start!");
 
-  while(1){
-    _delay_ms(100);
+  field[0] = (uint8_t) 1;
+
+  field[1] = (uint8_t) 1;
+  field[88] = (uint8_t) 1;
+
+  printArray(field, FIELD_WIDTH * FIELD_HEIGHT);
+
+  while (1)
+  {
+    displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
   }
   
 }
