@@ -48,11 +48,13 @@ void initButton()
   PORTC |= _BV(BUTTON_B);
 }
 
-void initBuzzer() {
+void initBuzzer()
+{
   DDRC |= _BV(BUZZER_PIN);
 }
 
-void beep(){
+void beep()
+{
   if (ENABLE_SOUND)
   {
     PORTC |= _BV(BUZZER_PIN);
@@ -107,7 +109,7 @@ void makeTetrominos()
     fprintf(stderr, "Memory allocation failed\n");
   }
 
-  //preload all tetris pieces into the TETROMINOS struct
+  // preload all tetris pieces into the TETROMINOS struct
   pieces->all[0].bits = 0b0010001000100010;
   pieces->all[1].bits = 0b0010011001000000;
   pieces->all[2].bits = 0b0100011000100000;
@@ -131,14 +133,30 @@ void printPiece(uint16_t p)
   }
 }
 
-int getRotatedIndex(int px, int py, int rotation){
-  switch (rotation % 4){
-        case 0: return py * 4 + px;         //0 degrees
-        case 1: return 12 + py - (px * 4);  //90 degrees
-        case 2: return 15 - (py * 4) - px;  //180 degrees
-        case 3: return 3 - py + (px * 4);   //270 degrees
-    }
-    return 0;
+int getRotatedIndex(int px, int py, int rotation)
+{
+  switch (rotation % 4)
+  {
+  case 0:
+    return py * 4 + px; // 0 degrees
+  case 1:
+    return 12 + py - (px * 4); // 90 degrees
+  case 2:
+    return 15 - (py * 4) - px; // 180 degrees
+  case 3:
+    return 3 - py + (px * 4); // 270 degrees
+  }
+  return 0;
+}
+
+void checkTetris()
+{
+}
+
+void newPiece()
+{
+  cx = 2;
+  cy = -3;
 }
 
 void clearPiece()
@@ -150,16 +168,17 @@ void clearPiece()
     // pixel    = pixel value at this index of the selected tile
     // fi       = "field index" (position of the pixel on the game field)
 
-    int tx = i % 4; 
-    int ty = i / 4; 
+    int tx = i % 4;
+    int ty = i / 4;
     int tpi = getRotatedIndex(tx, ty, cr);
 
-    int pixel = (pieces->all[ci].bits & (1 << (15-tpi))) ? 1 : 0;
+    int pixel = (pieces->all[ci].bits & (1 << (15 - tpi))) ? 1 : 0;
 
     int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
 
     // if the pixel is on the game field and is set to 1, push it to the game field
-    if (fi > 0 && field[fi]) field[fi] = 0;    
+    if (fi > 0 && field[fi] && pixel)
+      field[fi] = 0;
   }
 }
 
@@ -172,22 +191,73 @@ void placePiece()
     // pixel    = pixel value at this index of the selected tile
     // fi       = "field index" (position of the pixel on the game field)
 
-    int tx = i % 4; 
-    int ty = i / 4; 
+    int tx = i % 4;
+    int ty = i / 4;
     int tpi = getRotatedIndex(tx, ty, cr);
 
-    int pixel = (pieces->all[ci].bits & (1 << (15-tpi))) ? 1 : 0;
+    int pixel = (pieces->all[ci].bits & (1 << (15 - tpi))) ? 1 : 0;
 
     int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
 
     // if the pixel is on the game field and is set to 1, push it to the game field
-    if (fi > 0 && pixel) field[fi] = pixel;    
+    if (fi > 0 && pixel)
+      field[fi] = pixel;
   }
 }
 
-void putTile(int x, int y, int rotation)
+// make sure that rotation doesn't go negative while changing its value
+void addRotationWithClamp(int r)
+{
+  cr += r;
+  while (cr < 0)
+  {
+    cr = 4 + cr;
+  }
+}
+
+void putTile(int x, int y, int r)
 {
   beep();
+
+  clearPiece();
+  cx += x;
+  cy += y;
+  addRotationWithClamp(r);
+
+  // scan
+  for (int i = 0; i <= 15; i++)
+  {
+    // tx, ty   = "tile x" and "tile y" (on tile 4x4 grid)
+    // tpi      = "tile pixel index"
+    // pixel    = pixel value at this index of the selected tile
+    // fi       = "field index" (position of the pixel on the game field)
+
+    int tx = i % 4;
+    int ty = i / 4;
+    int tpi = getRotatedIndex(tx, ty, cr);
+
+    int pixel = (pieces->all[ci].bits & (1 << (15 - tpi))) ? 1 : 0;
+
+    int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
+
+    // if the pixel is on the game field and is set to 1, push it to the game field
+    if (fi > 0 && pixel && field[fi])
+    {
+      cx -= x;
+      cy -= y;
+      cr -= r;
+
+      placePiece();
+      if (cy > 0)
+      {
+        newPiece();
+        checkTetris();
+      }
+      return;
+    }
+  }
+
+  placePiece();
 }
 
 void timerUpdate()
@@ -208,11 +278,11 @@ void rotatePiece(int rotation)
 // interrupt for buttons connected to PORTB
 ISR(PCINT0_vect)
 {
-  _delay_ms(DEBOUNCE_TIME);
-  
+
   if (bit_is_clear(PINB, BUTTON_LEFT))
   {
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINB, BUTTON_LEFT))
     {
       movePiece(-1, 0);
@@ -221,6 +291,7 @@ ISR(PCINT0_vect)
   if (bit_is_clear(PINB, BUTTON_RIGHT))
   {
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINB, BUTTON_RIGHT))
     {
       movePiece(1, 0);
@@ -238,14 +309,15 @@ ISR(PCINT1_vect)
   {
     // nothing happens when button UP is pressed
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINC, BUTTON_UP))
     {
-
     }
   }
   if (bit_is_clear(PINC, BUTTON_DOWN))
   {
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINC, BUTTON_DOWN))
     {
       movePiece(0, 1);
@@ -254,6 +326,7 @@ ISR(PCINT1_vect)
   if (bit_is_clear(PINC, BUTTON_A))
   {
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINC, BUTTON_A))
     {
       rotatePiece(-1);
@@ -262,6 +335,7 @@ ISR(PCINT1_vect)
   if (bit_is_clear(PINC, BUTTON_B))
   {
     _delay_ms(DEBOUNCE_TIME);
+
     if (bit_is_clear(PINC, BUTTON_B))
     {
       rotatePiece(1);
@@ -273,10 +347,13 @@ int main()
 {
   // enable button pins
   initButton();
+
   // enable Matrix pins
   initMatrix();
+
   // enable buzzer
   initBuzzer();
+
   // enable serial communication
   initUSART();
 
@@ -286,24 +363,13 @@ int main()
   // enable global interrupts
   sei();
 
+  // initialize the "pieces" array with values of tetrominos (tetris pieces)
   makeTetrominos();
-
-  
 
   // printArray(field, FIELD_WIDTH * FIELD_HEIGHT);
 
   while (1)
   {
-    placePiece();
-    for (int i = 0; i < 100; i++)
-    {
-      displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
-    }
-    clearPiece();
-    for (int i = 0; i < 100; i++)
-    {
-      displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
-    }
-    
+    displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
   }
 }
