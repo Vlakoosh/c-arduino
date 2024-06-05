@@ -27,6 +27,9 @@
 #define FIELD_HEIGHT 16
 #define ENABLE_SOUND 1
 
+uint16_t interval_ms = 350;
+uint16_t count = 0;
+
 // initialize button pins and their registers with correct values
 void initButton()
 {
@@ -78,36 +81,61 @@ void initButtonInterrupts()
 
 void initADC(void)
 {
-    // AREF = AVcc
-    ADMUX = (1 << REFS0);
-    
-    // ADC Enable and prescaler of 128
-    // 16000000/128 = 125000
-    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+  // AREF = AVcc
+  ADMUX = (1 << REFS0);
+
+  // ADC Enable and prescaler of 128
+  // 16000000/128 = 125000
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 }
 
 uint16_t readADC(uint8_t ch)
 {
-    // Select ADC channel ch must be 0-7
-    ch &= 0b00000111;
-    ADMUX = (ADMUX & 0xF8) | ch;
-    
-    // Start single conversion
-    ADCSRA |= (1 << ADSC);
-    
-    // Wait for conversion to complete
-    while (ADCSRA & (1 << ADSC));
-    
-    return (ADC);
+  // Select ADC channel ch must be 0-7
+  ch &= 0b00000111;
+  ADMUX = (ADMUX & 0xF8) | ch;
+
+  // Start single conversion
+  ADCSRA |= (1 << ADSC);
+
+  // Wait for conversion to complete
+  while (ADCSRA & (1 << ADSC))
+    ;
+
+  return (ADC);
 }
 
 int getRandomNumber(int max)
 {
   // get the random seed from pin A4 (channel 4)
-  uint16_t seed = readADC(4); 
+  uint16_t seed = readADC(4);
   srand(seed);
 
   return rand() % (max + 1);
+}
+
+void set_timer1_interval(uint16_t interval)
+{
+  interval_ms = interval;
+
+  // Calculate the compare value based on the interval
+  // OCR1A = (F_CPU / (prescaler * 1000)) * interval - 1
+  OCR1A = (F_CPU / 64 / 1000) * interval_ms * 2 - 1;
+}
+
+void initGameLoopTimer(void)
+{
+  // Set CTC mode
+  TCCR1B |= (1 << WGM12);
+  
+  // Set compare value for 1ms interval
+  OCR1A = (F_CPU / 64 / 1000) - 1; // 16,000,000 / 64 / 1000 - 1 = 249
+  
+  // Enable Output Compare A Match Interrupt
+  TIMSK1 |= (1 << OCIE1A);
+  
+  // Start timer with prescaler 64
+  TCCR1B |= (1 << CS11) | (1 << CS10);
 }
 
 // game logic starts here:
@@ -126,7 +154,7 @@ typedef struct
 
 int cr = 0; // the current rotation of the piece. each unit represents 90 degrees
 int cx = 2; // the current x position of the moving tile
-int cy = 4; // the current y position of the moving tile
+int cy = -3; // the current y position of the moving tile
 int ci = 3; // the index of the current selected tetris piece in the "pieces" array
 
 uint8_t field[FIELD_HEIGHT * FIELD_WIDTH] = {0};
@@ -184,37 +212,55 @@ int getRotatedIndex(int px, int py, int rotation)
   return 0;
 }
 
-void deleteRow(int row){
-  for (int column = 0; column < FIELD_WIDTH; column++) {
-        field[row * FIELD_WIDTH + column] = 0;
-    }
+void deleteRow(int row)
+{
+  for (int column = 0; column < FIELD_WIDTH; column++)
+  {
+    field[row * FIELD_WIDTH + column] = 0;
+  }
 }
 
-void movePiecesDown(int row) {
-  for (int y = row; y > 0; y--){
-        for (int x = 0; x < FIELD_WIDTH; x++){
-            int index = y * FIELD_WIDTH + x;
-            int nextIndex = index - FIELD_WIDTH;
-            field[index] = field[nextIndex];
-        }
+void movePiecesDown(int row)
+{
+  for (int y = row; y > 0; y--)
+  {
+    for (int x = 0; x < FIELD_WIDTH; x++)
+    {
+      int index = y * FIELD_WIDTH + x;
+      int nextIndex = index - FIELD_WIDTH;
+      field[index] = field[nextIndex];
     }
+  }
+}
+
+void beepTetris() {
+  for (int i = 0; i < 3; i++)
+  {
+    beep();
+    _delay_ms(100);
+  }
 }
 
 void checkTetris()
 {
-  for (int row = 0; row < FIELD_HEIGHT; row++){
-        int tetris = 1;
-        for (int column = 0; column < FIELD_WIDTH; column++){
-            if (field[row*FIELD_WIDTH + column] == 0){
-                tetris = 0;
-                break;
-            }
-        }
-        if (tetris){
-            deleteRow(row);
-            movePiecesDown(row);
-        }
+  for (int row = 0; row < FIELD_HEIGHT; row++)
+  {
+    int tetris = 1;
+    for (int column = 0; column < FIELD_WIDTH; column++)
+    {
+      if (field[row * FIELD_WIDTH + column] == 0)
+      {
+        tetris = 0;
+        break;
+      }
     }
+    if (tetris)
+    {
+      deleteRow(row);
+      movePiecesDown(row);
+      beepTetris();
+    }
+  }
 }
 
 void newPiece()
@@ -282,8 +328,6 @@ void addRotationWithClamp(int r)
 
 void putTile(int x, int y, int r)
 {
-  beep();
-
   clearPiece();
   cx += x;
   cy += y;
@@ -296,6 +340,8 @@ void putTile(int x, int y, int r)
     // tpi      = "tile pixel index"
     // pixel    = pixel value at this index of the selected tile
     // fi       = "field index" (position of the pixel on the game field)
+    // mxfi     = "max field index" (maximum position of pixel)
+    // mnfi     = "min field index" (minimum position of pixel)
 
     int tx = i % 4;
     int ty = i / 4;
@@ -304,15 +350,18 @@ void putTile(int x, int y, int r)
     int pixel = (pieces->all[ci].bits & (1 << (15 - tpi))) ? 1 : 0;
 
     int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
+    int mxfi = cy*FIELD_WIDTH + FIELD_WIDTH + ty*FIELD_WIDTH - 1;
+    int mnfi = cy*FIELD_WIDTH + ty*FIELD_WIDTH;
 
-    if ( (fi > 0 && pixel && field[fi]) || (fi > (FIELD_HEIGHT * FIELD_WIDTH) && pixel) )
+    if ((fi > 0 && pixel && field[fi]) || (fi > (FIELD_HEIGHT * FIELD_WIDTH) && pixel) || ((fi > mxfi || fi < mnfi) && pixel) )
     {
       cx -= x;
       cy -= y;
       cr -= r;
 
       placePiece();
-      if (cy > 0)
+      
+      if (y > 0)
       {
         newPiece();
         checkTetris();
@@ -331,12 +380,19 @@ void timerUpdate()
 
 void movePiece(int x, int y)
 {
+  beep();
   putTile(x, y, 0);
 }
 
 void rotatePiece(int rotation)
 {
+  beep();
   putTile(0, 0, rotation);
+}
+
+void updatePiece()
+{
+  putTile(0, 1, 0);
 }
 
 // interrupt for buttons connected to PORTB
@@ -407,6 +463,17 @@ ISR(PCINT1_vect)
   }
 }
 
+// Interrupt Service Routine for Timer1 Compare Match A
+ISR(TIMER1_COMPA_vect)
+{
+  count++;
+  if (count >= interval_ms)
+  {
+    updatePiece();
+    count = 0;
+  }
+}
+
 int main()
 {
   // enable button pins
@@ -425,6 +492,9 @@ int main()
   initButtonInterrupts();
 
   initADC();
+
+  // enable timer 1 interrupts and game loop
+  initGameLoopTimer();
 
   // enable global interrupts
   sei();

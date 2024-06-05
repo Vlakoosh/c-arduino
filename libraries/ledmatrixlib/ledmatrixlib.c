@@ -315,13 +315,16 @@ void displayRow(int row, uint8_t columns)
   {
     setMultipleColumnsOnBottomMatrix(columns);
     setRowOnBottomMatrix(row - 8);
+    _delay_us(500);
+    lightDownWholeBottomMatrix();
   }
   else
   {
     setMultipleColumnsOnTopMatrix(columns);
     setRowOnTopMatrix(row);
+    _delay_us(500);
+    lightDownWholeTopMatrix();
   }
-  _delay_us(500);
 }
 
 void testDisplay()
