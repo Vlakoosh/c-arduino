@@ -17,11 +17,14 @@
 #define BUTTON_A PC3
 #define BUTTON_B PC2
 
-#define DEBOUNCE_TIME 50
+#define BUZZER_PIN PC5
+
+#define DEBOUNCE_TIME 100
 
 // game properties
 #define FIELD_WIDTH 8
 #define FIELD_HEIGHT 16
+#define ENABLE_SOUND 1
 
 // initialize button pins and their registers with correct values
 void initButton()
@@ -43,6 +46,19 @@ void initButton()
 
   PORTC |= _BV(BUTTON_A);
   PORTC |= _BV(BUTTON_B);
+}
+
+void initBuzzer() {
+  DDRC |= _BV(BUZZER_PIN);
+}
+
+void beep(){
+  if (ENABLE_SOUND)
+  {
+    PORTC |= _BV(BUZZER_PIN);
+    _delay_ms(3);
+    PORTC &= ~_BV(BUZZER_PIN);
+  }
 }
 
 void initButtonInterrupts()
@@ -71,9 +87,10 @@ typedef struct
 
 // global variables:
 
-int rotation = 0;
-int currentX = 0;
-int currentY = 0;
+int cr = 0; // the current rotation of the piece. each unit represents 90 degrees
+int cx = 2; // the current x position of the moving tile
+int cy = 4; // the current y position of the moving tile
+int ci = 3; // the index of the current selected tetris piece in the "pieces" array
 
 uint8_t field[FIELD_HEIGHT * FIELD_WIDTH] = {0};
 
@@ -114,16 +131,63 @@ void printPiece(uint16_t p)
   }
 }
 
+int getRotatedIndex(int px, int py, int rotation){
+  switch (rotation % 4){
+        case 0: return py * 4 + px;         //0 degrees
+        case 1: return 12 + py - (px * 4);  //90 degrees
+        case 2: return 15 - (py * 4) - px;  //180 degrees
+        case 3: return 3 - py + (px * 4);   //270 degrees
+    }
+    return 0;
+}
+
 void clearPiece()
 {
+  for (int i = 0; i <= 15; i++)
+  {
+    // tx, ty   = "tile x" and "tile y" (on tile 4x4 grid)
+    // tpi      = "tile pixel index"
+    // pixel    = pixel value at this index of the selected tile
+    // fi       = "field index" (position of the pixel on the game field)
+
+    int tx = i % 4; 
+    int ty = i / 4; 
+    int tpi = getRotatedIndex(tx, ty, cr);
+
+    int pixel = (pieces->all[ci].bits & (1 << (15-tpi))) ? 1 : 0;
+
+    int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
+
+    // if the pixel is on the game field and is set to 1, push it to the game field
+    if (fi > 0 && field[fi]) field[fi] = 0;    
+  }
 }
 
 void placePiece()
 {
+  for (int i = 0; i <= 15; i++)
+  {
+    // tx, ty   = "tile x" and "tile y" (on tile 4x4 grid)
+    // tpi      = "tile pixel index"
+    // pixel    = pixel value at this index of the selected tile
+    // fi       = "field index" (position of the pixel on the game field)
+
+    int tx = i % 4; 
+    int ty = i / 4; 
+    int tpi = getRotatedIndex(tx, ty, cr);
+
+    int pixel = (pieces->all[ci].bits & (1 << (15-tpi))) ? 1 : 0;
+
+    int fi = cx + tx + cy * FIELD_WIDTH + ty * FIELD_WIDTH;
+
+    // if the pixel is on the game field and is set to 1, push it to the game field
+    if (fi > 0 && pixel) field[fi] = pixel;    
+  }
 }
 
 void putTile(int x, int y, int rotation)
 {
+  beep();
 }
 
 void timerUpdate()
@@ -145,43 +209,63 @@ void rotatePiece(int rotation)
 ISR(PCINT0_vect)
 {
   _delay_ms(DEBOUNCE_TIME);
-
+  
   if (bit_is_clear(PINB, BUTTON_LEFT))
   {
-    printf("button LEFT pressed\n");
-    movePiece(-1, 0);
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINB, BUTTON_LEFT))
+    {
+      movePiece(-1, 0);
+    }
   }
   if (bit_is_clear(PINB, BUTTON_RIGHT))
   {
-    printf("button RIGHT pressed\n");
-    movePiece(1, 0);
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINB, BUTTON_RIGHT))
+    {
+      movePiece(1, 0);
+    }
   }
 }
 
 // interrupt for buttons connected to PORTC
 ISR(PCINT1_vect)
 {
-  _delay_ms(DEBOUNCE_TIME);
+  // I really wanted to avoid it, but I have to use double if statement to debounce
+  // If I don't do that, the screen will flicker also every time the button is released, making game unpleasant to play
 
   if (bit_is_clear(PINC, BUTTON_UP))
   {
-    printf("button UP pressed\n");
     // nothing happens when button UP is pressed
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINC, BUTTON_UP))
+    {
+
+    }
   }
   if (bit_is_clear(PINC, BUTTON_DOWN))
   {
-    printf("button DOWN pressed\n");
-    movePiece(0, 1);
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINC, BUTTON_DOWN))
+    {
+      movePiece(0, 1);
+    }
   }
   if (bit_is_clear(PINC, BUTTON_A))
   {
-    printf("button A pressed\n");
-    rotatePiece(-1);
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINC, BUTTON_A))
+    {
+      rotatePiece(-1);
+    }
   }
   if (bit_is_clear(PINC, BUTTON_B))
   {
-    printf("button B pressed\n");
-    rotatePiece(1);
+    _delay_ms(DEBOUNCE_TIME);
+    if (bit_is_clear(PINC, BUTTON_B))
+    {
+      rotatePiece(1);
+    }
   }
 }
 
@@ -189,26 +273,37 @@ int main()
 {
   // enable button pins
   initButton();
-  // set button interrupt registers
-  initButtonInterrupts();
   // enable Matrix pins
   initMatrix();
+  // enable buzzer
+  initBuzzer();
   // enable serial communication
   initUSART();
 
-  makeTetrominos();
+  // set button interrupt registers
+  initButtonInterrupts();
 
   // enable global interrupts
   sei();
 
-  field[0] = (uint8_t)1;
-  field[1] = (uint8_t)1;
-  field[88] = (uint8_t)1;
+  makeTetrominos();
+
+  
 
   // printArray(field, FIELD_WIDTH * FIELD_HEIGHT);
 
   while (1)
   {
-    displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
+    placePiece();
+    for (int i = 0; i < 100; i++)
+    {
+      displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
+    }
+    clearPiece();
+    for (int i = 0; i < 100; i++)
+    {
+      displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
+    }
+    
   }
 }
