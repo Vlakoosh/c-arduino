@@ -39,4 +39,6 @@ uint16_t readADC(uint8_t ch);
 // sound / buzzer
 void initBuzzer();
 void tripleBeep();
+void goodBeep();
+void badBeep();
 void beep();

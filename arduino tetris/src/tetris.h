@@ -19,6 +19,10 @@ extern int cx;  // the current x position of the moving tile
 extern int cy; // the current y position of the moving tile
 extern int ci;  // the index of the current selected tetris piece in the "pieces" array
 
+extern int score;
+extern int tetrisCount;
+extern int pieceCount;
+
 //structs
 typedef struct
 {
@@ -43,6 +47,9 @@ int getRotatedIndex(int px, int py, int rotation);
 void moveTilesDownAboveRow(int row);
 void deleteRowOfPixels(int row);
 void checkTetris();
+
+void lose();
+void printScore();
 
 void addRotationWithClamp(int r);
 void putTile(int x, int y, int r);

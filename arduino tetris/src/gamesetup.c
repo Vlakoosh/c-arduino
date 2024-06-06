@@ -26,7 +26,6 @@
 
 uint8_t field[FIELD_HEIGHT * FIELD_WIDTH] = {0};
 
-
 // initialize button pins and their registers with correct values
 void initButton()
 {
@@ -74,6 +73,84 @@ void tripleBeep()
     beep();
     _delay_ms(100);
   }
+}
+
+void goodBeep()
+{
+  if (ENABLE_SOUND)
+  {
+    // C note - ~523 Hz - 1911 us delay
+    // delay / 2 (two delays) / 10 (1/10th of a second)
+    for (int i = 0; i < 523/2/10; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1911);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1911);
+    }
+    _delay_ms(200);
+    // E note - ~659 Hz - 1516.86 us delay
+    // delay / 2 (two delays) / 10 (1/10th of a second)
+    for (int i = 0; i < 523/2/10; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1517);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1517);
+    }
+    _delay_ms(200);
+    // G note - ~783.99 Hz - 1275.52 us delay
+    // delay / 2 (two delays) / 10 (1/10th of a second)
+    for (int i = 0; i < 784/2/10; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1276);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1276);
+    }
+    _delay_ms(200);
+  }
+}
+
+void badBeep() 
+{
+  // D note - ~ 587.33 - 1703 us delay
+  // C# note - ~ 554.37 - 1804 us delay
+  // C note - ~523 Hz - 1911 us delay
+  // B note - ~493.883 Hz - 2024 us delay
+
+  for (int i = 0; i < 587/2/5; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1703);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1703);
+    }
+    _delay_ms(200);
+    for (int i = 0; i < 554/2/5; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1804);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1804);
+    }
+    _delay_ms(200);
+    for (int i = 0; i < 523/2/5; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(1911);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(1911);
+    }
+    _delay_ms(200);
+    for (int i = 0; i < 494/2/5; i++)
+    {
+      PORTC |= _BV(BUZZER_PIN);
+      _delay_us(2024);
+      PORTC &= ~_BV(BUZZER_PIN);
+      _delay_us(2024);
+    }
+    _delay_ms(200);
 }
 
 void initButtonInterrupts()

@@ -9,8 +9,6 @@
 #include <ledmatrixlib.h>
 #include <gamesetup.h>
 
-
-
 // this interval is the amount of time between tetris "updates" (piece moves down by 1 square)
 uint16_t interval_ms = 350;
 uint16_t count = 0;
@@ -34,15 +32,11 @@ int cx = 2;  // the current x position of the moving tile
 int cy = -3; // the current y position of the moving tile
 int ci = 3;  // the index of the current selected tetris piece in the "pieces" array
 
+int score = 0;
+int tetrisCount = 0;
+int pieceCount = 0;
+
 TETROMINOS *pieces;
-
-
-
-
-
-
-
-
 
 void makeTetrominos()
 {
@@ -103,7 +97,7 @@ void moveTilesDownAboveRow(int row)
   }
 }
 
-//check if there are full rows 
+// check if there are full rows
 void checkTetris()
 {
   for (int row = 0; row < FIELD_HEIGHT; row++)
@@ -119,10 +113,11 @@ void checkTetris()
     }
     if (tetris)
     {
-      deleteRowOfPixels
-    (row);
+      tetrisCount++;
+      score += 1000;
+      deleteRowOfPixels(row);
       moveTilesDownAboveRow(row);
-      tripleBeep();
+      goodBeep();
     }
   }
 }
@@ -132,6 +127,8 @@ void newPiece()
   cx = 2;
   cy = -3;
   ci = getRandomNumber(6);
+  pieceCount++;
+  score += 100;
 }
 
 void clearPiece()
@@ -190,6 +187,25 @@ void addRotationWithClamp(int r)
   }
 }
 
+void printScore()
+{
+  printf("\n\nYou lose!\n");
+  printf("Your final score is: %d", score);
+  printf("\ntotal rows completed: %d", tetrisCount);
+  printf("\ntotal pieces placed: %d", pieceCount);
+}
+
+void lose()
+{
+  badBeep();
+  printScore();
+  while (1)
+  {
+    // stop any code execution. Just display the field
+    displayScreenArray(field, FIELD_WIDTH, FIELD_HEIGHT);
+  }
+}
+
 void putTile(int x, int y, int r)
 {
   clearPiece();
@@ -227,6 +243,10 @@ void putTile(int x, int y, int r)
 
       if (y > 0)
       {
+        if (cy < -1)
+        {
+          lose();
+        }
         newPiece();
         checkTetris();
       }
@@ -338,8 +358,9 @@ ISR(TIMER1_COMPA_vect)
   }
 }
 
-void playTetris(){
-    // enable button pins
+void playTetris()
+{
+  // enable button pins
   initButton();
 
   // enable Matrix pins
