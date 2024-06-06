@@ -5,6 +5,8 @@ In this class I learned about programming embedded systems with C and Arduino un
 # Semester project
 ### Tetris
 
+![alt arduino](https://raw.githubusercontent.com/Vlakoosh/open-source-image-assets/main/image_2024-06-06_144756347.png)
+
 # Weekly Projects
 
 ### Week 1 LED Library
